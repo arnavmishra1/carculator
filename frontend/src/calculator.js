@@ -20,6 +20,7 @@ export function createCalculator(api) {
     expression: '',
     caption: '',
     error: '',
+    fact: '',
     showingResult: false,
     history: [],
   })
@@ -29,12 +30,14 @@ export function createCalculator(api) {
     state.showingResult = false
     state.caption = ''
     state.error = ''
+    state.fact = ''
   }
 
   function clear() {
     state.expression = ''
     state.caption = ''
     state.error = ''
+    state.fact = ''
     state.showingResult = false
   }
 
@@ -123,14 +126,16 @@ export function createCalculator(api) {
       if (state.showingResult || !state.expression) return
       const expression = state.expression
       try {
-        const { result, history } = await api.calculate(expression)
+        const { result, fact, history } = await api.calculate(expression)
         state.history = history
         state.caption = `${expression} =`
         state.expression = asDisplayText(result)
         state.error = ''
+        state.fact = fact ?? ''
         state.showingResult = true
       } catch (error) {
         state.error = error.message
+        state.fact = ''
         state.caption = expression
       }
     },

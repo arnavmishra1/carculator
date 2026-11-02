@@ -8,6 +8,7 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 from calculator.engine import CalculationError, calculate
+from calculator.facts import find_fact
 from calculator.history import History
 
 HOST = "127.0.0.1"
@@ -57,7 +58,14 @@ class _Handler(SimpleHTTPRequestHandler):
 
         with self.server.history_lock:
             self.server.history.add(expression, result)
-        self._send_json(200, {"result": result, "history": self._history_entries()})
+        self._send_json(
+            200,
+            {
+                "result": result,
+                "fact": find_fact(result),
+                "history": self._history_entries(),
+            },
+        )
 
     def do_DELETE(self):
         if self.path != "/api/history":

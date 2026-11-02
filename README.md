@@ -7,7 +7,8 @@ in your browser.
 
 - Add, subtract, multiply, divide, percent, sign toggle, parentheses and decimals
 - Exact decimal arithmetic, so `0.1 + 0.2` gives `0.3`
-- History panel: click a past calculation to reuse it
+- A car fun fact for the answer, when one matches it or is within 5% of it
+- History panel you can open and close: click a past calculation to reuse it
 - Light and dark themes
 - Long numbers shrink to fit the display
 
@@ -67,11 +68,13 @@ npm --prefix frontend test
 | Enter or `=` | Calculate |
 | Backspace | Delete the last character |
 | Esc | Clear |
+| `H` | Show or hide history |
 
 ## Layout
 
 - `calculator/engine.py`: parses and evaluates expressions, with no UI code
 - `calculator/history.py`: stores past calculations for the session
+- `calculator/facts.py`: picks a car fact for a result from `car_facts.json`
 - `calculator/server.py`: local HTTP server for the API and the built frontend
 - `frontend/src/calculator.js`: expression editing rules and app state
 - `frontend/src/App.vue`: the display, keypad, history panel and keyboard handling

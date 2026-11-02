@@ -41,13 +41,19 @@ def calculate(base_url, expression):
     return status, json.loads(body)
 
 
-def test_calculate_returns_result_and_history(base_url):
+def test_calculate_returns_result_fact_and_history(base_url):
+    status, body = calculate(base_url, "100+81")
+    assert status == 200
+    assert body["result"] == "181"
+    assert "181 horsepower" in body["fact"]
+    assert body["history"] == [{"expression": "100+81", "result": "181"}]
+
+
+def test_fact_is_null_when_nothing_matches(base_url):
     status, body = calculate(base_url, "0.1+0.2")
     assert status == 200
-    assert body == {
-        "result": "0.3",
-        "history": [{"expression": "0.1+0.2", "result": "0.3"}],
-    }
+    assert body["result"] == "0.3"
+    assert body["fact"] is None
 
 
 def test_calculation_errors_are_reported_and_not_recorded(base_url):

@@ -15,6 +15,7 @@ const FONT_SIZE_STEP = 2
 const DISPLAY_PADDING = 12
 const CAPTION_LIMIT = 40
 const HISTORY_TEXT_LIMIT = 24
+const HISTORY_OPEN_KEY = 'calculator.historyOpen'
 
 const calculator = createCalculator(api)
 const { state } = calculator
@@ -61,7 +62,29 @@ const keys = [
   { label: '=', style: 'equals', press: calculator.equals },
 ]
 
+function readHistoryOpen() {
+  try {
+    return localStorage.getItem(HISTORY_OPEN_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+const historyOpen = ref(readHistoryOpen())
+const toggleHistory = () => {
+  historyOpen.value = !historyOpen.value
+}
+watch(historyOpen, (open) => {
+  try {
+    localStorage.setItem(HISTORY_OPEN_KEY, String(open))
+  } catch {
+    // The panel still works; it just won't remember its state.
+  }
+})
+
 const characterKeys = {
+  h: toggleHistory,
+  H: toggleHistory,
   '+': () => calculator.pressOperator(PLUS),
   '-': () => calculator.pressOperator(MINUS),
   '*': () => calculator.pressOperator(TIMES),
@@ -155,8 +178,32 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="app">
+  <main class="app" :class="{ 'history-open': historyOpen }">
     <section class="calculator" aria-label="Calculator">
+      <div class="toolbar">
+        <button
+          type="button"
+          class="toolbar-button"
+          aria-controls="history-panel"
+          :aria-expanded="historyOpen"
+          title="Show or hide history (H)"
+          @mousedown.prevent
+          @click="toggleHistory"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l3 2" />
+          </svg>
+          History
+        </button>
+
+        <label class="theme-switch">
+          <input v-model="dark" type="checkbox" role="switch" />
+          <span class="track" aria-hidden="true"></span>
+          Dark theme
+        </label>
+      </div>
+
       <div class="caption">{{ caption }}</div>
       <output
         ref="displayElement"
@@ -165,6 +212,11 @@ onBeforeUnmount(() => {
         :style="{ fontSize: `${displayFontSize}px` }"
         >{{ displayText }}</output
       >
+
+      <p class="fact" :class="{ visible: state.fact }" aria-live="polite">
+        <span v-if="state.fact" class="fact-icon" aria-hidden="true">🚗</span>
+        <span>{{ state.fact }}</span>
+      </p>
 
       <div class="keypad" @mousedown.prevent>
         <button
@@ -181,16 +233,30 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <aside class="panel" aria-label="History">
+    <aside
+      v-show="historyOpen"
+      id="history-panel"
+      class="panel"
+      aria-label="History"
+    >
       <header class="panel-header">
         <h1>History</h1>
         <button
           type="button"
-          class="clear-history"
+          class="panel-button"
           @mousedown.prevent
           @click="calculator.clearHistory()"
         >
           Clear
+        </button>
+        <button
+          type="button"
+          class="panel-button close-history"
+          aria-label="Close history"
+          @mousedown.prevent
+          @click="historyOpen = false"
+        >
+          ✕
         </button>
       </header>
 
@@ -207,12 +273,6 @@ onBeforeUnmount(() => {
           <span>= {{ tail(entry.result, HISTORY_TEXT_LIMIT) }}</span>
         </button>
       </div>
-
-      <label class="theme-switch">
-        <input v-model="dark" type="checkbox" role="switch" />
-        <span class="track" aria-hidden="true"></span>
-        Dark theme
-      </label>
     </aside>
   </main>
 </template>

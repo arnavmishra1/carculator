@@ -5,6 +5,7 @@ function setup(api = {}) {
   return createCalculator({
     calculate: vi.fn(async (expression) => ({
       result: '5',
+      fact: 'A car fact',
       history: [{ expression, result: '5' }],
     })),
     loadHistory: vi.fn(async () => ({ history: [] })),
@@ -81,6 +82,7 @@ describe('equals', () => {
       expression: '5',
       caption: `2${PLUS}3 =`,
       error: '',
+      fact: 'A car fact',
       showingResult: true,
       history: [{ expression: `2${PLUS}3`, result: '5' }],
     })
@@ -151,6 +153,52 @@ describe('equals', () => {
     })
     await calculator.pressDigit('2')
     expect(calculator.state.error).toBe('')
+  })
+})
+
+describe('fact', () => {
+  async function withFact() {
+    const calculator = setup()
+    calculator.pressDigit('2')
+    await calculator.equals()
+    expect(calculator.state.fact).toBe('A car fact')
+    return calculator
+  }
+
+  it.each([
+    ['a digit', (calculator) => calculator.pressDigit('1')],
+    ['an operator', (calculator) => calculator.pressOperator(PLUS)],
+    ['percent', (calculator) => calculator.percent()],
+    ['clear', (calculator) => calculator.clear()],
+    ['backspace', (calculator) => calculator.backspace()],
+    [
+      'reusing history',
+      (calculator) => calculator.reuseEntry({ expression: '1', result: '1' }),
+    ],
+  ])('is cleared by %s', async (_name, act) => {
+    const calculator = await withFact()
+    await act(calculator)
+    expect(calculator.state.fact).toBe('')
+  })
+
+  it('is empty when the server has no fact', async () => {
+    const calculator = setup({
+      calculate: async () => ({ result: '0.3', fact: null, history: [] }),
+    })
+    calculator.pressDigit('1')
+    await calculator.equals()
+    expect(calculator.state.fact).toBe('')
+  })
+
+  it('is not shown with an error', async () => {
+    const calculator = setup({
+      calculate: async () => {
+        throw new Error('Invalid expression')
+      },
+    })
+    calculator.pressDigit('1')
+    await calculator.equals()
+    expect(calculator.state.fact).toBe('')
   })
 })
 
