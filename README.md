@@ -12,7 +12,34 @@ in your browser.
 - Light and dark themes
 - Long numbers shrink to fit the display
 
-## Setup
+## Run
+
+All you need is Python 3.11 or newer. There is nothing to install.
+
+```bash
+git clone https://github.com/arnavmishra1/carculator.git
+```
+
+```bash
+cd carculator
+```
+
+```bash
+python3 main.py
+```
+
+This serves the app at `http://127.0.0.1:8765` and opens it in your browser.
+Press Ctrl+C in the terminal to stop it. On Windows, use `py main.py` instead.
+
+The server uses only Python's standard library, and the built frontend is
+committed in `frontend/dist`, so Node isn't needed to run the app.
+
+## Development
+
+You only need these steps to run the tests or change the frontend. Python 3.11
+and Node 24 are known to work.
+
+### Python tests
 
 ```bash
 python3 -m venv .venv
@@ -23,23 +50,18 @@ python3 -m venv .venv
 ```
 
 ```bash
+.venv/bin/python -m pytest
+```
+
+### Frontend
+
+```bash
 npm --prefix frontend install
 ```
 
 ```bash
-npm --prefix frontend run build
+npm --prefix frontend test
 ```
-
-Python 3.11 and Node 24 are known to work.
-
-## Run
-
-```bash
-.venv/bin/python main.py
-```
-
-This serves the app at `http://127.0.0.1:8765` and opens it in your browser.
-Press Ctrl+C in the terminal to stop it. Rebuild the frontend after changing it.
 
 To work on the frontend with hot reload, keep `main.py` running and start Vite
 in a second terminal:
@@ -48,14 +70,11 @@ in a second terminal:
 npm --prefix frontend run dev
 ```
 
-## Test
+After changing the frontend, rebuild it and commit `frontend/dist` along with
+your changes, so the app keeps running without Node:
 
 ```bash
-.venv/bin/python -m pytest
-```
-
-```bash
-npm --prefix frontend test
+npm --prefix frontend run build
 ```
 
 ## Keyboard
@@ -78,7 +97,7 @@ npm --prefix frontend test
 - `calculator/server.py`: local HTTP server for the API and the built frontend
 - `frontend/src/calculator.js`: expression editing rules and app state
 - `frontend/src/App.vue`: the display, keypad, history panel and keyboard handling
-- `tests/`: tests for the engine, history and server
+- `tests/`: tests for the engine, history, facts and server
 
 Expressions are parsed with Python's `ast` module and only numbers and approved
 operators are accepted, so typed input never runs as code.
