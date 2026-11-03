@@ -163,7 +163,7 @@ export function createCalculator(api) {
   }
 
   // Actions run strictly in order, so keys typed right after "=" apply to the
-  // result rather than racing the server's response.
+  // result rather than racing the calculation.
   let queue = Promise.resolve()
   const queued = Object.fromEntries(
     Object.entries(actions).map(([name, action]) => [

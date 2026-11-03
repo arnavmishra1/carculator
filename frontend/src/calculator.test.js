@@ -181,7 +181,7 @@ describe('fact', () => {
     expect(calculator.state.fact).toBe('')
   })
 
-  it('is empty when the server has no fact', async () => {
+  it('is empty when no fact matches', async () => {
     const calculator = setup({
       calculate: async () => ({ result: '0.3', fact: null, history: [] }),
     })
@@ -218,13 +218,13 @@ describe('history', () => {
   it('keeps entries when clearing fails', async () => {
     const calculator = setup({
       clearHistory: async () => {
-        throw new Error("Can't reach the server")
+        throw new Error("Storage failed")
       },
     })
     calculator.pressDigit('2')
     calculator.equals()
     await calculator.clearHistory()
     expect(calculator.state.history).toHaveLength(1)
-    expect(calculator.state.error).toBe("Can't reach the server")
+    expect(calculator.state.error).toBe("Storage failed")
   })
 })

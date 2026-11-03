@@ -1,24 +1,31 @@
-const UNREACHABLE = "Can't reach the server"
+// The calculator's data operations, all run in the browser.
 
-async function request(path, options) {
-  let response, body
-  try {
-    response = await fetch(path, options)
-    body = await response.json()
-  } catch {
-    throw new Error(UNREACHABLE)
+import { CalculationError, calculate } from './engine.js'
+import { findFact } from './facts.js'
+import { createHistory } from './history.js'
+
+export function createApi(history = createHistory()) {
+  return {
+    async calculate(expression) {
+      let result
+      try {
+        result = calculate(expression)
+      } catch (error) {
+        throw error instanceof CalculationError
+          ? error
+          : new CalculationError('Invalid expression')
+      }
+      history.add(expression, result)
+      return { result, fact: findFact(result), history: history.entries() }
+    },
+    async loadHistory() {
+      return { history: history.entries() }
+    },
+    async clearHistory() {
+      history.clear()
+      return { history: [] }
+    },
   }
-  if (!response.ok) throw new Error(body.error ?? UNREACHABLE)
-  return body
 }
 
-export const api = {
-  calculate: (expression) =>
-    request('/api/calculate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ expression }),
-    }),
-  loadHistory: () => request('/api/history'),
-  clearHistory: () => request('/api/history', { method: 'DELETE' }),
-}
+export const api = createApi()

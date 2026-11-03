@@ -3,7 +3,7 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [vue()],
-  server: {
-    proxy: { '/api': 'http://127.0.0.1:8765' },
-  },
+  // Relative asset paths, so the build works from any folder, such as
+  // https://<user>.github.io/carculator/ on GitHub Pages.
+  base: './',
 })

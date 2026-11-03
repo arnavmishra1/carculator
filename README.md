@@ -1,7 +1,8 @@
 # Calculator
 
-A calculator with a Vue interface and a Python engine. It runs locally and opens
-in your browser.
+A calculator with a Vue interface that runs entirely in your browser.
+
+**Try it:** https://arnavmishra1.github.io/carculator/
 
 ## Features
 
@@ -9,73 +10,51 @@ in your browser.
 - Exact decimal arithmetic, so `0.1 + 0.2` gives `0.3`
 - A car fun fact for the answer, when one matches it or is within 5% of it
 - History panel you can open and close: click a past calculation to reuse it
+- History is saved in your browser, so it's still there on your next visit
 - Light and dark themes
 - Long numbers shrink to fit the display
 
-## Run
+## Run locally
 
-All you need is Python 3.11 or newer. There is nothing to install.
+You need Node 24 or newer.
 
 ```bash
 git clone https://github.com/arnavmishra1/carculator.git
 ```
 
 ```bash
-cd carculator
+cd carculator/frontend
 ```
 
 ```bash
-python3 main.py
-```
-
-This serves the app at `http://127.0.0.1:8765` and opens it in your browser.
-Press Ctrl+C in the terminal to stop it. On Windows, use `py main.py` instead.
-
-The server uses only Python's standard library, and the built frontend is
-committed in `frontend/dist`, so Node isn't needed to run the app.
-
-## Development
-
-You only need these steps to run the tests or change the frontend. Python 3.11
-and Node 24 are known to work.
-
-### Python tests
-
-```bash
-python3 -m venv .venv
+npm install
 ```
 
 ```bash
-.venv/bin/pip install -r requirements.txt
+npm run dev
+```
+
+This starts a dev server with hot reload and prints its address, usually
+`http://localhost:5173`.
+
+## Test and build
+
+```bash
+npm test
 ```
 
 ```bash
-.venv/bin/python -m pytest
+npm run build
 ```
 
-### Frontend
+The build goes to `frontend/dist`. It uses relative paths, so it works from any
+folder on any static host.
 
-```bash
-npm --prefix frontend install
-```
+## Deploy
 
-```bash
-npm --prefix frontend test
-```
-
-To work on the frontend with hot reload, keep `main.py` running and start Vite
-in a second terminal:
-
-```bash
-npm --prefix frontend run dev
-```
-
-After changing the frontend, rebuild it and commit `frontend/dist` along with
-your changes, so the app keeps running without Node:
-
-```bash
-npm --prefix frontend run build
-```
+Every push to `main` runs the tests, builds the app and publishes it to GitHub
+Pages, using `.github/workflows/deploy.yml`. In the repository's
+**Settings → Pages**, the source must be set to **GitHub Actions**.
 
 ## Keyboard
 
@@ -91,13 +70,16 @@ npm --prefix frontend run build
 
 ## Layout
 
-- `calculator/engine.py`: parses and evaluates expressions, with no UI code
-- `calculator/history.py`: stores past calculations for the session
-- `calculator/facts.py`: picks a car fact for a result from `car_facts.json`
-- `calculator/server.py`: local HTTP server for the API and the built frontend
-- `frontend/src/calculator.js`: expression editing rules and app state
-- `frontend/src/App.vue`: the display, keypad, history panel and keyboard handling
-- `tests/`: tests for the engine, history, facts and server
+All code is in `frontend/src`:
 
-Expressions are parsed with Python's `ast` module and only numbers and approved
-operators are accepted, so typed input never runs as code.
+- `engine.js`: parses and evaluates expressions, with no UI code
+- `facts.js`: picks a car fact for a result from `car_facts.json`
+- `history.js`: stores past calculations in the browser's local storage
+- `api.js`: connects the engine, facts and history for the interface
+- `calculator.js`: expression editing rules and app state
+- `App.vue`: the display, keypad, history panel and keyboard handling
+- `*.test.js`: tests for each of the above
+
+Expressions are read by a small parser that accepts only numbers and approved
+operators, so typed input never runs as code. Arithmetic uses `decimal.js`, so
+results are exact decimals rather than floating-point approximations.
